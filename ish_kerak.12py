@@ -1,0 +1,543 @@
+from aiogram import types, Bot, Dispatcher, Router
+import asyncio
+from aiogram.filters import Command
+import logging
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.types import InlineKeyboardButton
+from aiogram import F
+import re
+
+
+PHONE_PATTERN = r"\+998[0-9]{9}"
+
+logging.basicConfig(level=logging.INFO)
+bot = Bot(token="7156760678:AAE4uYHSJMsDIjmXFg-ztm7bs7LHOUfGkqE")
+
+
+form_router = Router()
+
+dp = Dispatcher()
+
+class IshJoyKerak(StatesGroup):
+    ism = State()
+    yosh = State()
+    texnologiya = State()
+    telefon_raqam = State()
+    hudud = State()
+    narh = State()
+    kasb = State()
+    vaqt = State()
+    maqsad = State()
+    javob = State()
+
+class SherikKerak(StatesGroup):
+    ism = State()
+    yosh = State()
+    texnologiya = State()
+    telefon_raqam = State()
+    hudud = State()
+    narh = State()
+    kasb = State()
+    vaqt = State()
+    maqsad = State()
+
+class UstozKerak(StatesGroup):
+    ism = State()
+    yosh = State()
+    texnologiya = State()
+    telefon_raqam = State()
+    hudud = State()
+    narh = State()
+    kasb = State()
+    vaqt = State()
+    maqsad = State()
+
+
+def Question_buttons():
+    buttons = [
+        [KeyboardButton(text="Ha"),KeyboardButton(text="Yoq")]
+    ]
+    return ReplyKeyboardMarkup(keyboard = buttons, resize_keyboard=True)
+
+def start_buttons() -> ReplyKeyboardMarkup:
+    button_1 = KeyboardButton(text='Sherik kerak')
+    button_2 = KeyboardButton(text='Ish joyi kerak')
+    button_3 = KeyboardButton(text='Hodim kerak')
+    button_4 = KeyboardButton(text='Ustoz kerak')
+    button_5 = KeyboardButton(text='Shogird kerak')
+
+    reply_buttons = ReplyKeyboardMarkup(
+        keyboard = [
+            [button_1, button_2],
+            [button_3, button_4],
+            [button_5]
+        ], resize_keyboard=True
+    )
+    return reply_buttons
+
+
+@form_router.message(Command('start'))
+async def get_started(message: types.Message):
+    full_name = message.from_user.full_name
+    await message.answer(f"Assalomu alaykum, {full_name}", reply_markup=start_buttons())
+
+@form_router.message(F.text == 'Ish joyi kerak')
+async def ish_joyi_kerak(message: types.Message, state: FSMContext):
+    text = """Ish joyi topish uchun ariza berish
+
+    Hozir sizga birnecha savollar beriladi. 
+    Har biriga javob bering. 
+    Oxirida agar hammasi to`g`ri bo`lsa, HA tugmasini bosing va arizangiz Adminga yuboriladi.
+
+    Ism, familyangizni kiriting?
+    """
+    await message.answer(text=text)
+    await state.set_state(IshJoyKerak.ism)
+
+
+@form_router.message(IshJoyKerak.ism)
+async def set_user_name(message: types.Message, state: FSMContext):
+    await state.update_data(ism=message.text)
+    text = """Yosh:
+    Yoshingizni kiriting
+    masalan, 19
+    """
+    await message.answer(text)
+    await state.set_state(IshJoyKerak.yosh)
+
+
+
+
+@form_router.message(IshJoyKerak.yosh)
+async def set_user_age(message: types.Message, state: FSMContext):
+    if not message.text.isdigit():
+        return await message.answer("yosh faqat sonlardan iborat bolishi kerak")
+    await state.update_data(yosh=message.text)
+    text = """Texnologiya:
+
+    Talab qilinadigan texnologiyalarni kiriting?
+    Texnologiya nomlarini vergul bilan ajrating. Masalan, 
+
+    Java, C++, C#
+    """
+    await message.answer(text)
+    await state.set_state(IshJoyKerak.texnologiya)
+
+@form_router.message(IshJoyKerak.texnologiya)
+async def set_user_texnogy(message: types.Message, state: FSMContext):
+    await state.update_data(texnologiya=message.text)
+    text = """Aloqa: 
+
+    Bog`lanish uchun raqamingizni kiriting?
+    Masalan, +998901234567
+    """
+    await message.answer(text)
+    await state.set_state(IshJoyKerak.telefon_raqam)
+
+@form_router.message(IshJoyKerak.telefon_raqam)
+async def set_user_number(message: types.Message, state: FSMContext):
+    if not re.match(PHONE_PATTERN, message.text):
+        return await message.answer("Uzbekiston raqami ekanligiga ishonch hosil qiling!!!")
+    await state.update_data(telefon_raqam=message.text)
+    text = """🌐 Hudud: 
+
+    Qaysi hududdansiz?
+    Viloyat nomi, Toshkent shahar yoki Respublikani kiriting
+    """
+    await message.answer(text)
+    await state.set_state(IshJoyKerak.hudud)
+
+@form_router.message(IshJoyKerak.hudud)
+async def set_user_number(message: types.Message, state: FSMContext):
+    await state.update_data(hudud=message.text)
+    text = """💰 Narxi:
+
+    Tolov qilasizmi yoki Tekinmi?
+    Kerak bo`lsa, Summani kiriting?
+    """
+    await message.answer(text)
+    await state.set_state(IshJoyKerak.narh)
+
+@form_router.message(IshJoyKerak.narh)
+async def set_user_number(message: types.Message, state: FSMContext):
+    
+    await state.update_data(narh=message.text)
+    text = """👨🏻‍💻 Kasbi: 
+
+    Ishlaysizmi yoki o`qiysizmi?
+    Masalan, Talaba
+    """
+    await message.answer(text)
+    await state.set_state(IshJoyKerak.kasb)
+
+@form_router.message(IshJoyKerak.kasb)
+async def set_user_number(message: types.Message, state: FSMContext):
+  
+    await state.update_data(kasb=message.text)
+    text = """🕰 Murojaat qilish vaqti: 
+
+    Qaysi vaqtda murojaat qilish mumkin?
+    Masalan, 9:00 - 18:00
+    """
+    await message.answer(text)
+    await state.set_state(IshJoyKerak.vaqt) 
+
+@form_router.message(IshJoyKerak.vaqt)
+async def set_user_number(message: types.Message, state: FSMContext):
+  
+    await state.update_data(vaqt=message.text)
+    text = """🔎 Maqsad: 
+
+    Maqsadingizni qisqacha yozib bering.
+    """
+    await message.answer(text)
+    await state.set_state(IshJoyKerak.maqsad) 
+
+@form_router.message(IshJoyKerak.maqsad, F.text=="Ha")
+async def send_message(message: types.Message, state: FSMContext):
+    await message.answer(text="Ma'lumotlaringiz qabul qilinmadi")
+    await state.clear()
+
+    # data = await state.get_data()
+    # text = "Ma'lumotlaringiz adminga yuborildi"
+
+    # await bot.send_message(chat_id=7156760678,text=text)
+    # await state.clear()
+
+
+@form_router.message(IshJoyKerak.maqsad , F.text=="Yoq")
+async def button_yoq(message: types.Message, state: FSMContext):
+    await message.answer(text="Ma'lumotlaringiz qabul qilinmadi")
+    await state.clear()
+    
+
+@form_router.message(IshJoyKerak.maqsad)
+async def set_user_number(message: types.Message, state: FSMContext):
+    await state.update_data(maqsad=message.text)
+    data = await state.get_data()
+    print(data)
+    text = f"""🧑 Hodim: {message.from_user.first_name}
+    🌐 Yosh: {data['yosh']}
+    📚 Texnologiya: {data['texnologiya']} 
+    🇺🇿 Telegram: @{message.from_user.username}
+    📞 Aloqa: {data['telefon_raqam']}
+    🌐 Hudud: {data['hudud']}
+    💰 Narxi: {data['narh']}
+    👨🏻‍💻 Kasbi: {data['kasb']}
+    🕰 Murojaat qilish vaqti: {data['vaqt']}
+    🔎 Maqsad: {data['maqsad']}
+
+    #Hodim
+     """
+    await message.answer(text, reply_markup=Question_buttons())
+    await message.answer(text="📚 Hamma ma'lumotlar to'g'rimi")
+   
+
+
+
+@form_router.message(F.text == 'Sherik kerak')
+async def sherik_kerak(message: types.Message, state: FSMContext):
+    text = """Sherik topish uchun ariza berish
+
+    Hozir sizga birnecha savollar beriladi. 
+    Har biriga javob bering. 
+    Oxirida agar hammasi to`g`ri bo`lsa, HA tugmasini bosing va arizangiz Adminga yuboriladi.
+
+    Ism, familyangizni kiriting?
+    """
+    await message.answer(text=text)
+    await state.set_state(SherikKerak.ism)
+
+
+@form_router.message(SherikKerak.ism)
+async def set_user_name(message: types.Message, state: FSMContext):
+    await state.update_data(ism=message.text)
+    text = """Yosh:
+    Yoshingizni kiriting
+    masalan, 19
+    """
+    await message.answer(text)
+    await state.set_state(SherikKerak.yosh)
+
+
+
+
+@form_router.message(SherikKerak.yosh)
+async def set_user_age(message: types.Message, state: FSMContext):
+    if not message.text.isdigit():
+        return await message.answer("yosh faqat sonlardan iborat bolishi kerak")
+    await state.update_data(yosh=message.text)
+    text = """Texnologiya:
+
+    Talab qilinadigan texnologiyalarni kiriting?
+    Texnologiya nomlarini vergul bilan ajrating. Masalan, 
+
+    Java, C++, C#
+    """
+    await message.answer(text)
+    await state.set_state(SherikKerak.texnologiya)
+
+@form_router.message(SherikKerak.texnologiya)
+async def set_user_texnogy(message: types.Message, state: FSMContext):
+    await state.update_data(texnologiya=message.text)
+    text = """Aloqa: 
+
+    Bog`lanish uchun raqamingizni kiriting?
+    Masalan, +998901234567
+    """
+    await message.answer(text)
+    await state.set_state(SherikKerak.telefon_raqam)
+
+@form_router.message(SherikKerak.telefon_raqam)
+async def set_user_number(message: types.Message, state: FSMContext):
+    if not re.match(PHONE_PATTERN, message.text):
+        return await message.answer("Uzbekiston raqami ekanligiga ishonch hosil qiling!!!")
+    await state.update_data(telefon_raqam=message.text)
+    text = """🌐 Hudud: 
+
+    Qaysi hududdansiz?
+    Viloyat nomi, Toshkent shahar yoki Respublikani kiriting
+    """
+    await message.answer(text)
+    await state.set_state(SherikKerak.hudud)
+
+@form_router.message(SherikKerak.hudud)
+async def set_user_number(message: types.Message, state: FSMContext):
+    await state.update_data(hudud=message.text)
+    text = """💰 Narxi:
+
+    Tolov qilasizmi yoki Tekinmi?
+    Kerak bo`lsa, Summani kiriting?
+    """
+    await message.answer(text)
+    await state.set_state(SherikKerak.narh)
+
+@form_router.message(SherikKerak.narh)
+async def set_user_number(message: types.Message, state: FSMContext):
+    
+    await state.update_data(narh=message.text)
+    text = """👨🏻‍💻 Kasbi: 
+
+    Ishlaysizmi yoki o`qiysizmi?
+    Masalan, Talaba
+    """
+    await message.answer(text)
+    await state.set_state(SherikKerak.kasb)
+
+@form_router.message(SherikKerak.kasb)
+async def set_user_number(message: types.Message, state: FSMContext):
+  
+    await state.update_data(kasb=message.text)
+    text = """🕰 Murojaat qilish vaqti: 
+
+    Qaysi vaqtda murojaat qilish mumkin?
+    Masalan, 9:00 - 18:00
+    """
+    await message.answer(text)
+    await state.set_state(SherikKerak.vaqt) 
+
+@form_router.message(SherikKerak.vaqt)
+async def set_user_number(message: types.Message, state: FSMContext):
+  
+    await state.update_data(vaqt=message.text)
+    text = """🔎 Maqsad: 
+
+    Maqsadingizni qisqacha yozib bering.
+    """
+    await message.answer(text)
+    await state.set_state(SherikKerak.maqsad) 
+
+
+    
+
+@form_router.message(SherikKerak.maqsad)
+async def set_user_number(message: types.Message, state: FSMContext):
+    await state.update_data(maqsad=message.text)
+    data = await state.get_data()
+    print(data)
+    text = f"""🧑 Sherik: {message.from_user.first_name}
+    🌐 Yosh: {data['yosh']}
+    📚 Texnologiya: {data['texnologiya']} 
+    🇺🇿 Telegram: @{message.from_user.username}
+    📞 Aloqa: {data['telefon_raqam']}
+    🌐 Hudud: {data['hudud']}
+    💰 Narxi: {data['narh']}
+    👨🏻‍💻 Kasbi: {data['kasb']}
+    🕰 Murojaat qilish vaqti: {data['vaqt']}
+    🔎 Maqsad: {data['maqsad']}
+
+    #sherik
+    """
+    await message.answer(text=text)
+    await message.answer(f"Ma'lumotlaringiz tog'ri kiritilganmi!!!",reply_markup=Question_buttons())
+
+@form_router.message(F.text == 'Ustoz kerak')
+async def ustoz_kerak(message: types.Message, state: FSMContext):
+    text = """Ustoz topish uchun ariza berish
+
+    Hozir sizga birnecha savollar beriladi. 
+    Har biriga javob bering. 
+    Oxirida agar hammasi to`g`ri bo`lsa, HA tugmasini bosing va arizangiz Adminga yuboriladi.
+
+    Ism, familyangizni kiriting?
+    """
+    await message.answer(text=text)
+    await state.set_state(UstozKerak.ism)
+
+
+@form_router.message(UstozKerak.ism)
+async def set_user_name(message: types.Message, state: FSMContext):
+    await state.update_data(ism=message.text)
+    text = """Yosh:
+    Yoshingizni kiriting
+    masalan, 19
+    """
+    await message.answer(text)
+    await state.set_state(UstozKerak.yosh)
+
+
+
+
+@form_router.message(UstozKerak.yosh)
+async def set_user_age(message: types.Message, state: FSMContext):
+    if not message.text.isdigit():
+        return await message.answer("yosh faqat sonlardan iborat bolishi kerak")
+    await state.update_data(yosh=message.text)
+    text = """Texnologiya:
+
+    Talab qilinadigan texnologiyalarni kiriting?
+    Texnologiya nomlarini vergul bilan ajrating. Masalan, 
+
+    Java, C++, C#
+    """
+    await message.answer(text)
+    await state.set_state(UstozKerak.texnologiya)
+
+@form_router.message(UstozKerak.texnologiya)
+async def set_user_texnogy(message: types.Message, state: FSMContext):
+    await state.update_data(texnologiya=message.text)
+    text = """Aloqa: 
+
+    Bog`lanish uchun raqamingizni kiriting?
+    Masalan, +998901234567
+    """
+    await message.answer(text)
+    await state.set_state(UstozKerak.telefon_raqam)
+
+@form_router.message(UstozKerak.telefon_raqam)
+async def set_user_number(message: types.Message, state: FSMContext):
+    if not re.match(PHONE_PATTERN, message.text):
+        return await message.answer("Uzbekiston raqami ekanligiga ishonch hosil qiling!!!")
+    await state.update_data(telefon_raqam=message.text)
+    text = """🌐 Hudud: 
+
+    Qaysi hududdansiz?
+    Viloyat nomi, Toshkent shahar yoki Respublikani kiriting
+    """
+    await message.answer(text)
+    await state.set_state(UstozKerak.hudud)
+
+@form_router.message(UstozKerak.hudud)
+async def set_user_number(message: types.Message, state: FSMContext):
+    await state.update_data(hudud=message.text)
+    text = """💰 Narxi:
+
+    Tolov qilasizmi yoki Tekinmi?
+    Kerak bo`lsa, Summani kiriting?
+    """
+    await message.answer(text)
+    await state.set_state(UstozKerak.narh)
+
+@form_router.message(UstozKerak.narh)
+async def set_user_number(message: types.Message, state: FSMContext):
+    
+    await state.update_data(narh=message.text)
+    text = """👨🏻‍💻 Kasbi: 
+
+    Ishlaysizmi yoki o`qiysizmi?
+    Masalan, Talaba
+    """
+    await message.answer(text)
+    await state.set_state(UstozKerak.kasb)
+
+@form_router.message(UstozKerak.kasb)
+async def set_user_number(message: types.Message, state: FSMContext):
+  
+    await state.update_data(kasb=message.text)
+    text = """🕰 Murojaat qilish vaqti: 
+
+    Qaysi vaqtda murojaat qilish mumkin?
+    Masalan, 9:00 - 18:00
+    """
+    await message.answer(text)
+    await state.set_state(UstozKerak.vaqt) 
+
+@form_router.message(UstozKerak.vaqt)
+async def set_user_number(message: types.Message, state: FSMContext):
+  
+    await state.update_data(vaqt=message.text)
+    text = """🔎 Maqsad: 
+
+    Maqsadingizni qisqacha yozib bering.
+    """
+    await message.answer(text)
+    await state.set_state(UstozKerak.maqsad) 
+
+# @form_router.message(IshJoyKerak.maqsad, F.text == "Ha")
+# async def set_user_number(message: types.Message, state: FSMContext):
+#     await state.update_data(maqsad=message.text)
+#     data = await state.get_data()
+#     print(data)
+#     text = f"""🎓 Shogird: {message.from_user.first_name}
+#     🌐 Yosh: {data['yosh']}
+#     📚 Texnologiya: {data['texnologiya']} 
+#     🇺🇿 Telegram: @{message.from_user.username}
+#     📞 Aloqa: {data['telefon_raqam']}
+#     🌐 Hudud: {data['hudud']}
+#     💰 Narxi: {data['narh']}
+#     👨🏻‍💻 Kasbi: {data['kasb']}
+#     🕰 Murojaat qilish vaqti: {data['vaqt']}
+#     🔎 Maqsad: {data['maqsad']}
+
+#     #Shogird
+#     """
+#     await bot.send_message(chat_id=7156760678, text=text) 
+#     await state.clear()
+    
+# @form_router.message(IshJoyKerak.maqsad, F.text == "Yoq")
+# async def set_user_number(message: types.Message, state: FSMContext):
+#     await message.answer("yuborilmadi")
+#     await state.clear()
+    
+
+@form_router.message(UstozKerak.maqsad)
+async def set_user_number(message: types.Message, state: FSMContext):
+    await state.update_data(maqsad=message.text)
+    data = await state.get_data()
+    print(data)
+    text = f"""🎓 Shogird: {message.from_user.first_name}
+    🌐 Yosh: {data['yosh']}
+    📚 Texnologiya: {data['texnologiya']} 
+    🇺🇿 Telegram: @{message.from_user.username}
+    📞 Aloqa: {data['telefon_raqam']}
+    🌐 Hudud: {data['hudud']}
+    💰 Narxi: {data['narh']}
+    👨🏻‍💻 Kasbi: {data['kasb']}
+    🕰 Murojaat qilish vaqti: {data['vaqt']}
+    🔎 Maqsad: {data['maqsad']}
+
+    #Shogird
+    """
+    await message.answer(text=text)
+    await message.answer(f"Ma'lumotlaringiz tog'ri kiritilganmi!!!",reply_markup=Question_buttons())
+
+async def main():
+    dp.include_router(form_router)
+    print("bot ishlayapti !!!")
+    await dp.start_polling(bot)
+
+if __name__ == "__main__":
+    asyncio.run(main())
